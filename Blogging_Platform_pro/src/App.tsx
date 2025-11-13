@@ -1,25 +1,26 @@
 import { useState } from 'react'
-import AnchorAnt from './AnchorAnt'
-import Prcative from './Prcative'
 import AuthLoginRegister from './Components/Authentication/AuthLoginRegister'
+import { createBrowserRouter } from 'react-router-dom'
+import { RouterProvider } from 'react-router-dom'
+import AuthContextProviderWithLayout from './Components/Context/AuthContextProviderWithLayout'
+import layoutProeject from './layoutProeject'
 
 
 
 function App() {
   const [Text, setText] = useState("Editable text content.")
-
+const router=createBrowserRouter([
+  {path:"/" , element:<AuthLoginRegister/>},
+  // {element:<layoutProeject/>,children:[
+  //   {path:"Home" , element:""},
+  //   {path:"" , element:""}
+  // ]}
+])
   return (
     <>
-    <AuthLoginRegister/>
-    <div className=' bg-white'>
-   
-{/* <AnchorAnt/>
-<Prcative/> */}
-</div>
-
-
-
-      
+    <AuthContextProviderWithLayout>
+    <RouterProvider router={router}></RouterProvider>
+  </AuthContextProviderWithLayout>
     </>
   )
 }
