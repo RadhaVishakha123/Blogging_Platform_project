@@ -28,7 +28,14 @@ export default function AuthContextProviderWithLayout({
       return true;
     }
   }
-  function FetchProflile(Email: string, Password: string) {}
+  function FetchProflile(Email: string, Password: string) {
+    const user = Userdata.find((User)=> User.Email===Email && User.Password===Password);
+    if(!user){
+      message.error("Invalid email or password");
+      return null;
+    }
+    return user;
+  }
   useEffect(()=>{
     localStorage.setItem("Userdata",JSON.stringify(Userdata));
   },[Userdata])

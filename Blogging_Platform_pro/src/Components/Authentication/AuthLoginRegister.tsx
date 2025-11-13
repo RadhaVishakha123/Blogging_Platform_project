@@ -4,18 +4,27 @@ import { useMediaQuery } from "react-responsive";
 import "antd/dist/reset.css";
 import useAuth from "../Context/AuthContext";
 import Bloglog from "../../assets/Bloglog.png";
-
+import { useNavigate } from "react-router-dom";
 const { Title, Text } = Typography;
 
 export default function AuthLoginRegister() {
-  const { AddUser } = useAuth();
+  const { AddUser,FetchProflile } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
 const [form]=Form.useForm();//Create a form instance
+const navigate=useNavigate();
   const onFinish = (values: any) => {
     console.log("Form Submitted:", values);
     
     if (isLogin) {
+      const user=FetchProflile(values.Email,values.Password);
+      if(!user)return;
+      else{
+        message.success(`Welcome back, ${user.Username}!`);
+        form.resetFields();
+        alert("✅ Login successful!");
+        navigate("/Home");
+      }
 
     } 
     else {
@@ -24,8 +33,8 @@ const [form]=Form.useForm();//Create a form instance
       if(!found)return;
       else{
       form.resetFields();
-
       setIsLogin(true);
+      
       }
     }
   };
