@@ -6,6 +6,15 @@ export const AuthContext=createContext<UserAuthContext>({
     Userdata:[],
         AddUser:(data:Omit<User, "Id">)=>false,
         FetchProflile:(Email:string,Password:string)=>null,
+        isModalOpen:false,
+     setIsModalOpen:( value: boolean ) => {},
+     isslideOpen:false,
+      setIsSlideOpen:( value: boolean ) => {},
+      imageFile:"",
+       setImageFile:( value: any ) => {},
+       CurrentUser:null,
+        setCurrentUser:( value: User|null ) => {} 
+       
 })
 export const AuthContextProvider=AuthContext.Provider;
 export default function useAuth(){

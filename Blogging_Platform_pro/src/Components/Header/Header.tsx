@@ -5,14 +5,29 @@ import {
   PlusCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import useAuth from "../Context/AuthContext";
 import { useState } from "react";
-import { Drawer, Input } from "antd";
+import { Drawer, Modal, Input, Upload, Button, List } from "antd";
+import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import PostPopup from "../Post/PostPopup";
 
 export default function Header() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isslideOpen, setIsSlideOpen] = useState(false);
   const [activeAction, setActiveAction] = useState<string>("");
-
+  const {
+    setIsModalOpen,
+    isslideOpen,
+    setIsSlideOpen,
+    setImageFile,
+    CurrentUser,
+  } = useAuth();
+  const uploadProps = {
+    beforeUpload: (file: any) => {
+      setImageFile(file);
+      return false; // prevent auto upload
+    },
+    showUploadList: false,
+    maxCount: 1,
+  };
   const isMobile = window.innerWidth < 768;
 
   const MenuItems = [
@@ -40,7 +55,6 @@ export default function Header() {
     <>
       {/* DESKTOP LEFT MENU */}
       <div className="hidden md:flex flex-col w-25 h-screen fixed left-0 top-0 bg-black text-white border-r border-gray-700 p-4 space-y-8">
-        
         <h2
           className="text-sm font-extrabold text-white tracking-wide text-center "
           style={{ fontFamily: "'Pacifico', cursive" }}
@@ -166,6 +180,8 @@ export default function Header() {
           allowClear
         />
       </Drawer>
+      <PostPopup />
+      
     </>
   );
 }

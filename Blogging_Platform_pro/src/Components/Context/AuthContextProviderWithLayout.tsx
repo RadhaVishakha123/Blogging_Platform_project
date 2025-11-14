@@ -12,6 +12,12 @@ export default function AuthContextProviderWithLayout({
   const [Userdata, setUserData] = useState<User[]>(() => {
     return JSON.parse(localStorage.getItem("Userdata") ?? "[]") || [];
   });
+  const [CurrentUser, setCurrentUser] = useState<User | null>(()=>{
+      return JSON.parse(localStorage.getItem("CurrentUser") ?? "null") || null
+    });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isslideOpen, setIsSlideOpen] = useState(false);
+    const [imageFile, setImageFile] = useState<any>(null);
   function AddUser(data: Omit<User, "Id">) {
     const id = nanoid(10);
     const found = Userdata.some(
@@ -19,6 +25,7 @@ export default function AuthContextProviderWithLayout({
         user.Email.trim().toLowerCase() == data.Email.trim().toLowerCase() ||
         user.Username.trim().toLowerCase() == data.Username.trim().toLowerCase()
     );
+    
     if (found) {//Alert is work in react return() not in function,and message is work in function and aslo in return()
    message.error("User with this email or username already exists");
       return false;
@@ -34,14 +41,24 @@ export default function AuthContextProviderWithLayout({
       message.error("Invalid email or password");
       return null;
     }
+    setCurrentUser(user);
     return user;
+    
   }
   useEffect(()=>{
     localStorage.setItem("Userdata",JSON.stringify(Userdata));
   },[Userdata])
+  useEffect(()=>{
+    localStorage.setItem("CurrentUser",JSON.stringify(CurrentUser));
+  },[CurrentUser])
   return (
     <>
-      <AuthContextProvider value={{ Userdata, AddUser, FetchProflile }}>
+      <AuthContextProvider value={{ Userdata, AddUser, FetchProflile,isModalOpen,
+     setIsModalOpen,
+     isslideOpen,
+      setIsSlideOpen,
+      imageFile,
+       setImageFile,CurrentUser, setCurrentUser }}>
         {children}
       </AuthContextProvider>
     </>
