@@ -7,5 +7,5 @@ export interface User{
 export interface UserAuthContext{
     Userdata:User[];
     AddUser:(data:Omit<User, "Id">)=>boolean;
-    FetchProflile:(Email:string,Password:string)=>void
+    FetchProflile:(Email:string,Password:string)=>User|null
 }
