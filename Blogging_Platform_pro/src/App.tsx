@@ -5,16 +5,16 @@ import { RouterProvider } from 'react-router-dom'
 import AuthContextProviderWithLayout from './Components/Context/AuthContextProviderWithLayout'
 import LayoutProeject from './LayoutProject'
 import Home from './Components/Home/Home'
-
+import UserProfile from './Components/User/UserProfile'
 
 
 function App() {
-  const [Text, setText] = useState("Editable text content.")
+  
 const router=createBrowserRouter([
   {path:"/" , element:<AuthLoginRegister/>},
   {element:<LayoutProeject/>,children:[
     {path:"Home" , element:<Home/>},
-    {path:"" , element:""}
+    {path:"UserProfile" , element:<UserProfile/>},  
   ]}
 ])
   return (

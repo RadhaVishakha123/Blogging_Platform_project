@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { AuthContextProvider } from "./AuthContext";
-import Alert from "antd/es/alert/Alert";
 import type { User } from "../Helper/Type";
 import { nanoid } from "nanoid";
-import { message } from "antd";
+import { App } from "antd";
 export default function AuthContextProviderWithLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { message } = App.useApp();
   const [Userdata, setUserData] = useState<User[]>(() => {
     return JSON.parse(localStorage.getItem("Userdata") ?? "[]") || [];
   });
@@ -19,12 +19,12 @@ export default function AuthContextProviderWithLayout({
         user.Email.trim().toLowerCase() == data.Email.trim().toLowerCase() ||
         user.Username.trim().toLowerCase() == data.Username.trim().toLowerCase()
     );
-    if (found) {
-      alert("⚠️ User already exists!");
+    if (found) {//Alert is work in react return() not in function,and message is work in function and aslo in return()
+   message.error("User with this email or username already exists");
       return false;
     } else {
       setUserData((pre) => [{ Id: id, ...data }, ...pre]);
-      alert("✅ User registered successfully!");
+      message.success("Registration successful! Please log in.");
       return true;
     }
   }

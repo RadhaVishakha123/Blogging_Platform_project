@@ -3,7 +3,7 @@ import Header from "./Components/Header/Header"
 export default function LayoutProject(){
     return(
         <>
-        <header/>
+        <Header/>
         <Outlet/>
         </>
     )
