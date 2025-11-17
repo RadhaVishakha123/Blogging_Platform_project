@@ -6,7 +6,7 @@ import AuthContextProviderWithLayout from './Components/Context/AuthContextProvi
 import LayoutProeject from './LayoutProject'
 import Home from './Components/Home/Home'
 import UserProfile from './Components/User/UserProfile'
-
+import UserProfileContextWithlayout from './Components/Context/UserProfileContextWithlayout'
 
 function App() {
   
@@ -20,9 +20,12 @@ const router=createBrowserRouter([
   return (
     <>
     <AuthContextProviderWithLayout>
+      <UserProfileContextWithlayout>
     <RouterProvider router={router}></RouterProvider>
-  </AuthContextProviderWithLayout>
+    </UserProfileContextWithlayout>
+    </AuthContextProviderWithLayout>
     </>
+    
   )
 }
 
