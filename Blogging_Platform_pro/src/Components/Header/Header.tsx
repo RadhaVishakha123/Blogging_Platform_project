@@ -8,19 +8,21 @@ import {
 import useAuth from "../Context/AuthContext";
 import { useState } from "react";
 import { Drawer, Modal, Input, Upload, Button, List } from "antd";
-import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
+import { UploadOutlined, DeleteOutlined,LoginOutlined } from "@ant-design/icons";
 import PostPopup from "../Post/PostPopup";
 import { useNavigate } from "react-router-dom";
 import useSearch from "../Context/SearchContext";
+import Default_User from "../../assets/Default_User.jpg";
+import { useEffect } from "react";
 
 export default function Header() {
-  const [activeAction, setActiveAction] = useState<string>("");
+  
   const {
     setIsModalOpen,
     isslideOpen,
     setIsSlideOpen,
     setImageFile,
-    CurrentUser,Userdata
+    CurrentUser,Userdata,activeAction,setActiveAction
   } = useAuth();
   const uploadProps = {
     beforeUpload: (file: any) => {
@@ -53,7 +55,40 @@ export default function Header() {
       },
     },
     { name: "Profile", icon: <UserOutlined />, path: "/UserProfile" },
+    {
+      name: "LogOut",
+      icon: <LoginOutlined />,
+      path: "/",
+    },
   ];
+
+
+useEffect(() => {
+  switch (activeAction) {
+    case "Home":
+      navigate("/Home");
+      break;
+
+    case "Profile":
+      navigate("/UserProfile");
+      break;
+
+    case "Search":
+      setIsSlideOpen(true);
+      break;
+
+    case "Create":
+      setIsModalOpen(true);
+      break;
+
+    case "LogOut":
+      navigate("/");
+      break;
+
+    default:
+      break;
+  }
+}, [activeAction]);
 
   return (
     <>
@@ -178,6 +213,7 @@ export default function Header() {
   onClose={() => {
     setIsSlideOpen(false);
     setQuery("");
+    setActiveAction("Home");
   }}
 >
   <Input.Search
@@ -205,11 +241,12 @@ export default function Header() {
               setQuery("");
               // Navigate to the user's profile page
               // Example using React Router:
+              setActiveAction("");
               navigate(`/UserProfile`,{state:{from:"search",userId:user.userId,username:user.username}});
             }}
           >
             <img
-              src={user.profilePic}
+              src={user.profilePic?user.profilePic:Default_User}
               alt={user.fullName}
               className="w-10 h-10 rounded-full object-cover border border-gray-600"
             />

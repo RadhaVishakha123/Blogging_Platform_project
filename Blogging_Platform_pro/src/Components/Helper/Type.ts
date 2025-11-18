@@ -17,11 +17,13 @@ export interface UserAuthContext{
        setImageFile:( value: any ) => void;
        CurrentUser:User|null;
         setCurrentUser:( value: User|null ) => void;
+        activeAction:string;
+         setActiveAction:( value: string ) => void;
+        
 }
 //user profile types
 export interface UserProfile{
     userId: string;
-    username: string;
     fullName: string;
     bio: string;
     profilePic: string;
@@ -58,6 +60,10 @@ export interface UserProfileContextType{
     //post add
     AddPost:(data:Omit<UserPost, "postId" | "createdAt">)=>boolean;
     FetchUserPosts(userId: string): UserPost[]
+    //follow & unfollow check
+    FollowUser:(currentUserId:string,targetUserId:string)=>void;
+    UnfollowUser:(currentUserId:string,targetUserId:string)=>void;
+   CheckIsFollowing: (currentUserId: string, targetUserId: string) => boolean;
 
 }
 //search types

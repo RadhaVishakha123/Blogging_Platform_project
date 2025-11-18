@@ -13,7 +13,9 @@ export const AuthContext=createContext<UserAuthContext>({
       imageFile:"",
        setImageFile:( value: any ) => {},
        CurrentUser:null,
-        setCurrentUser:( value: User|null ) => {} 
+        setCurrentUser:( value: User|null ) => {} ,
+         activeAction:"",
+         setActiveAction:( value: string ) => {}
        
 })
 export const AuthContextProvider=AuthContext.Provider;
