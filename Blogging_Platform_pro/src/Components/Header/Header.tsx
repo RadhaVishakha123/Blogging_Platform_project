@@ -10,6 +10,8 @@ import { useState } from "react";
 import { Drawer, Modal, Input, Upload, Button, List } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
 import PostPopup from "../Post/PostPopup";
+import { useNavigate } from "react-router-dom";
+import useSearch from "../Context/SearchContext";
 
 export default function Header() {
   const [activeAction, setActiveAction] = useState<string>("");
@@ -18,7 +20,7 @@ export default function Header() {
     isslideOpen,
     setIsSlideOpen,
     setImageFile,
-    CurrentUser,
+    CurrentUser,Userdata
   } = useAuth();
   const uploadProps = {
     beforeUpload: (file: any) => {
@@ -28,6 +30,8 @@ export default function Header() {
     showUploadList: false,
     maxCount: 1,
   };
+  const {setQuery,query,Searchdata}=useSearch();
+  const navigate = useNavigate();
   const isMobile = window.innerWidth < 768;
 
   const MenuItems = [
@@ -166,20 +170,60 @@ export default function Header() {
 
       {/* SEARCH DRAWER */}
       <Drawer
-        title="Search"
-        open={isslideOpen}
-        placement={isMobile ? "top" : "left"}
-        height={isMobile ? "40vh" : undefined}
-        width={isMobile ? "100%" : 350}
-        onClose={() => setIsSlideOpen(false)}
-      >
-        <Input.Search
-          prefix={<SearchOutlined />}
-          placeholder="Search posts..."
-          size="large"
-          allowClear
-        />
-      </Drawer>
+  title="Search"
+  open={isslideOpen}
+  placement={isMobile ? "top" : "left"}
+  height={isMobile ? "40vh" : undefined}
+  width={isMobile ? "100%" : 350}
+  onClose={() => {
+    setIsSlideOpen(false);
+    setQuery("");
+  }}
+>
+  <Input.Search
+    prefix={<SearchOutlined />}
+    placeholder="Search users..."
+    size="large"
+    allowClear
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+    className="mb-4"
+  />
+
+  {/* Search results */}
+  {query.trim() !== "" && (
+    <div className="space-y-3">
+      {Searchdata(query).length === 0 ? (
+        <p className="text-gray-500 text-center">No users found.</p>
+      ) : (
+        Searchdata(query).map((user) => (
+          <div
+            key={user.userId}
+            className="flex items-center gap-3 p-2 bg-black rounded hover:bg-gray-800 cursor-pointer"
+            onClick={() => {
+              setIsSlideOpen(false);
+              setQuery("");
+              // Navigate to the user's profile page
+              // Example using React Router:
+              navigate(`/UserProfile`,{state:{from:"search",userId:user.userId,username:user.username}});
+            }}
+          >
+            <img
+              src={user.profilePic}
+              alt={user.fullName}
+              className="w-10 h-10 rounded-full object-cover border border-gray-600"
+            />
+            <div className="text-white">
+              <p className="font-semibold">{user.username}</p>
+              <p className="text-gray-400 text-sm">{user.fullName}</p>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</Drawer>
+
       <PostPopup />
       
     </>

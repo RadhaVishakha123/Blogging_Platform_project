@@ -60,3 +60,17 @@ export interface UserProfileContextType{
     FetchUserPosts(userId: string): UserPost[]
 
 }
+//search types
+export interface SearchResult {
+  userId: string;
+  username: string;
+  fullName: string;
+  profilePic: string;
+  bio: string;
+  accountType: "public" | "private";
+}
+export interface SearchContextType{
+    query:string;
+    setQuery:(value:string)=>void;
+    Searchdata:(username:string)=>SearchResult[];
+}
