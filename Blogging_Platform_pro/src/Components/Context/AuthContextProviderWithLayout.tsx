@@ -18,6 +18,7 @@ export default function AuthContextProviderWithLayout({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isslideOpen, setIsSlideOpen] = useState(false);
     const [imageFile, setImageFile] = useState<any>(null);
+    const [activeAction,setActiveAction]=useState<string>("Home");
   function AddUser(data: Omit<User, "Id">) {
     const id = nanoid(10);
     const found = Userdata.some(
@@ -58,7 +59,8 @@ export default function AuthContextProviderWithLayout({
      isslideOpen,
       setIsSlideOpen,
       imageFile,
-       setImageFile,CurrentUser, setCurrentUser }}>
+       setImageFile,CurrentUser, setCurrentUser, activeAction,
+         setActiveAction }}>
         {children}
       </AuthContextProvider>
     </>

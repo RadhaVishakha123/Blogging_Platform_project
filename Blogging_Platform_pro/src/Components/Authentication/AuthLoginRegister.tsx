@@ -101,11 +101,11 @@ const navigate=useNavigate();
           >
             {!isLogin && (
               <Form.Item
-                label={<span className="text-white">Full Name</span>}
+                label={<span className="text-white">Usarname</span>}
                 name="Username"
                 rules={[{ required: true, message: "Please enter your name!" }]}
               >
-                <Input placeholder="John Doe" size="large" />
+                <Input placeholder="John32 " size="large" />
               </Form.Item>
             )}
 

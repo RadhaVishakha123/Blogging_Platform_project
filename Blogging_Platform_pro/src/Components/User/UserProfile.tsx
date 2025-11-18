@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import useUserProfile from "../Context/UserProfileContext";
 import EditprofileModal from "./EditprofileModal";
 import { useLocation } from "react-router-dom";
+import  Default_User from "../../assets/Default_User.jpg";
 
 export default function UserProfile() {
   const { CurrentUser } = useAuth();
@@ -20,9 +21,9 @@ export default function UserProfile() {
   const [userPosts, setUserPosts] = useState<any[]>([]);
 
   const location = useLocation();
-  const state = location.state as { userId?: string };
+ const state = location.state as { from?: string; userId?: string; username?: string };
   const profileUserId = state?.userId || CurrentUser?.Id; // Use clicked user or current user
-// const profileUsername = state?.username || CurrentUser?.Username;
+const profileUsername = state?.username || CurrentUser?.Username;
   const uploadProps = {
     beforeUpload: (file: any) => {
       setImageFile(file);
@@ -64,7 +65,7 @@ export default function UserProfile() {
           bio: userDetails.bio,
           profilePic: imageUrl,
           accountType: userDetails.accountType,
-          username: userDetails.username,
+          
         });
 
         setImageFile(null);
@@ -87,7 +88,7 @@ export default function UserProfile() {
           <div className="flex flex-col">
             <Avatar
               size={110}
-              src={userDetails.profilePic}
+              src={userDetails.profilePic ? userDetails.profilePic : Default_User}
               className="border-4 border-gray-700"
             />
             {isOwner && (
@@ -104,9 +105,9 @@ export default function UserProfile() {
           </div>
 
           <div>
-           {isOwner ? (<h1 className="text-2xl font-semibold">{CurrentUser.Username}</h1>) : (
-            <h1 className="text-2xl font-semibold">{"----"}</h1>
-           )}
+           <h1 className="text-2xl font-semibold">{profileUsername}</h1>
+            
+     
 
             <p className="text-gray-400">{userDetails.fullName}</p>
 
