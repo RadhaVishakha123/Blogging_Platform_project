@@ -1,4 +1,4 @@
-import { Avatar, Button, Card, Modal, Upload } from "antd";
+import { Avatar, Button,  Upload } from "antd";
 import { EditOutlined, LockOutlined, CameraOutlined } from "@ant-design/icons";
 import useAuth from "../Context/AuthContext";
 import { useEffect, useState } from "react";
@@ -11,10 +11,13 @@ export default function UserProfile() {
   const { CurrentUser } = useAuth();
   const {
     FetchProfliledata,
-    isProfilemodelOpen,
     setisProfilemodelOpen,
     AddUserProfile,
     FetchUserPosts,
+    FollowUser,
+    UnfollowUser,
+    Userfollowdata,
+    CheckIsFollowing,
   } = useUserProfile();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
@@ -24,7 +27,10 @@ export default function UserProfile() {
  const state = location.state as { from?: string; userId?: string; username?: string };
   const profileUserId = state?.userId || CurrentUser?.Id; // Use clicked user or current user
 const profileUsername = state?.username || CurrentUser?.Username;
-  const uploadProps = {
+const isFollowing=CheckIsFollowing(CurrentUser?.Id || "", profileUserId || "");
+const FollowerCount= Userfollowdata?.find(follow => follow.userId === profileUserId)?.followers.length || 0;
+const FollowingCount= Userfollowdata?.find(follow => follow.userId === profileUserId)?.following.length || 0; 
+const uploadProps = {
     beforeUpload: (file: any) => {
       setImageFile(file);
       return false; // prevent auto upload
@@ -113,8 +119,8 @@ const profileUsername = state?.username || CurrentUser?.Username;
 
             <div className="flex gap-8 mt-6 text-lg">
               <span><b>{userPosts.length}</b> Posts</span>
-              <span><b>0</b> Followers</span>
-              <span><b>0</b> Following</span>
+                <span><b>{FollowerCount}</b> Followers</span>
+              <span><b>{FollowingCount}</b> Following</span>
             </div>
           </div>
         </div>
@@ -136,7 +142,19 @@ const profileUsername = state?.username || CurrentUser?.Username;
               Edit Profile
             </Button>
           ) : (
-            <Button type="primary" className="mt-2">Follow</Button>
+            
+            <Button type={isFollowing ? "default" : "primary"}
+              className={`mt-2 ${isFollowing ? "bg-gray-800 text-white border-gray-700" : "bg-blue-600 hover:bg-blue-700 border-none"}`}
+              onClick={() => {
+                if (isFollowing) {
+                  UnfollowUser(CurrentUser.Id, profileUserId!);
+                } else {
+                  FollowUser(CurrentUser.Id, profileUserId!);
+                }
+              }}
+            >
+              {isFollowing ? "Unfollow" : "Follow"}
+            </Button> 
           )}
         </div>
 
