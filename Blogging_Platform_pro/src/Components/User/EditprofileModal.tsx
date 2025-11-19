@@ -20,7 +20,6 @@ export default function EditprofileModal() {
     bio: "",
     profilePic: "",
     accountType: "public",
-    username: "",
   });
 
   // LOAD USER DATA WHEN MODAL OPENS
@@ -34,7 +33,7 @@ export default function EditprofileModal() {
         bio: profile.bio,
         profilePic: profile.profilePic,
         accountType: profile.accountType,
-        username: profile.username,
+        
       });
     }
   }, [isProfilemodelOpen, CurrentUser]);
@@ -48,7 +47,7 @@ export default function EditprofileModal() {
       bio: tempData.bio,
       profilePic: tempData.profilePic,
       accountType: tempData.accountType,
-      username: tempData.username,
+     
     });
 
     setisProfilemodelOpen(false);

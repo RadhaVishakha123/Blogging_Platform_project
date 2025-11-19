@@ -4,8 +4,7 @@ import type {
   UserProfile,
   UserPost,
   UserPostcomment_like,
-  Userfollow ,
-  UserProfileContextType,
+  Userfollow,
 } from "../Helper/Type";
 import { nanoid } from "nanoid";
 import useAuth from "./AuthContext";
@@ -30,10 +29,11 @@ export default function UserProfileContextWithlayout({
     return JSON.parse(localStorage.getItem("UserPostdata") ?? "[]");
   });
 
-  const [UserPostcomment_likedata, setUserPostcomment_likedata] =
-    useState<UserPostcomment_like[]>(() => {
-      return JSON.parse(localStorage.getItem("UserPostcomment_likedata") ?? "[]");
-    });
+  const [UserPostcomment_likedata, setUserPostcomment_likedata] = useState<
+    UserPostcomment_like[]
+  >(() => {
+    return JSON.parse(localStorage.getItem("UserPostcomment_likedata") ?? "[]");
+  });
 
   const [Userfollowdata, setUserfollowdata] = useState<Userfollow[]>(() => {
     return JSON.parse(localStorage.getItem("Userfollowdata") ?? "[]");
@@ -46,9 +46,8 @@ export default function UserProfileContextWithlayout({
   function AddUserProfile(data: Omit<UserProfile, "userId">): boolean {
     const uid = CurrentUser?.Id;
     if (!uid) return false;
-const newUser: UserProfile = {
+    const newUser: UserProfile = {
       userId: uid,
-      username: data.username,
       fullName: data.fullName,
       bio: data.bio,
       profilePic: data.profilePic,
@@ -56,14 +55,14 @@ const newUser: UserProfile = {
     };
     const exists = UserProfiledata.some((u) => u.userId === uid);
     if (exists) {
-    // UPDATE EXISTING PROFILE
-    setUserProfiledata((prev) =>
-      prev.map((u) => (u.userId === uid ? newUser : u))
-    );
-  } else {
-    // ADD NEW USER PROFILE
-    setUserProfiledata((prev) => [...prev, newUser]);
-  }
+      // UPDATE EXISTING PROFILE
+      setUserProfiledata((prev) =>
+        prev.map((u) => (u.userId === uid ? newUser : u))
+      );
+    } else {
+      // ADD NEW USER PROFILE
+      setUserProfiledata((prev) => [...prev, newUser]);
+    }
     return true;
   }
 
@@ -76,7 +75,6 @@ const newUser: UserProfile = {
     if (!user) {
       return {
         userId,
-        username: "",
         fullName: "",
         bio: "",
         profilePic: "",
@@ -85,25 +83,97 @@ const newUser: UserProfile = {
     }
     return user;
   }
-  //AddPost function 
-    function AddPost(data: Omit<UserPost, "postId" | "createdAt">): boolean {
-        const uid = CurrentUser?.Id;
-        if (!uid) return false; 
-        const postId = nanoid(10);
-        const newPost: UserPost = {
-            postId,
-            userId: uid,
-            content: data.content,
-            imageUrl: data.imageUrl,
-            createdAt: new Date(),
+  //AddPost function
+  function AddPost(data: Omit<UserPost, "postId" | "createdAt">): boolean {
+    const uid = CurrentUser?.Id;
+    if (!uid) return false;
+    const postId = nanoid(10);
+    const newPost: UserPost = {
+      postId,
+      userId: uid,
+      content: data.content,
+      imageUrl: data.imageUrl,
+      createdAt: new Date(),
+    };
+    setUserPostdata((prev) => [newPost, ...prev]);
+    message.success("Post added successfully!");
+    return true;
+  }
+  function FetchUserPosts(userId: string): UserPost[] {
+    return UserPostdata.filter((post) => post.userId === userId);
+  }
+  // Follow user
+  function FollowUser(currentUserId: string, targetUserId: string) {
+    setUserfollowdata((prev) => {
+      const updatedData = [...prev];
+      let currentUserFollow = updatedData.find(
+        (uf) => uf.userId === currentUserId
+      );
+      let targetUserFollow = updatedData.find(
+        (uf) => uf.userId === targetUserId
+      );
+      if (!currentUserFollow) {
+        currentUserFollow = {
+          userId: currentUserId,
+          followers: [],
+          following: [],
         };
-        setUserPostdata((prev) => [newPost, ...prev]);
-        message.success("Post added successfully!");
-        return true;
-    }
-    function FetchUserPosts(userId: string): UserPost[] {
-   return UserPostdata.filter(post => post.userId === userId);
-}
+        updatedData.push(currentUserFollow);
+      }
+      if (!targetUserFollow) {
+        targetUserFollow = {
+          userId: targetUserId,
+          followers: [],
+          following: [],
+        };
+        updatedData.push(targetUserFollow);
+      }
+      if (!currentUserFollow.following.includes(targetUserId)) {
+        currentUserFollow.following.push(targetUserId);
+      }
+      if (!targetUserFollow.followers.includes(currentUserId)) {
+        targetUserFollow.followers.push(currentUserId);
+      }
+      return updatedData;
+    });
+  }
+  // Unfollow user
+  function UnfollowUser(currentUserId: string, targetUserId: string) {
+    setUserfollowdata((prev) => {
+      const updatedData = [...prev];
+      let currentUserFollow = updatedData.find(
+        (uf) => uf.userId === currentUserId
+      );
+      let targetUserFollow = updatedData.find(
+        (uf) => uf.userId === targetUserId
+      );
+      if (currentUserFollow) {
+        currentUserFollow.following = currentUserFollow.following.filter(
+          (id) => id !== targetUserId
+        );
+      }
+      if (targetUserFollow) {
+        targetUserFollow.followers = targetUserFollow.followers.filter(
+          (id) => id !== currentUserId
+        );
+      }
+      return updatedData;
+    });
+  }
+  function CheckIsFollowing(
+    currentUserId: string,
+    targetUserId: string
+  ): boolean {
+    const currentUserFollow = Userfollowdata.find(
+      (uf) => uf.userId === currentUserId
+    );
+    return currentUserFollow
+      ? currentUserFollow.following.includes(targetUserId)
+      : false;
+  }
+  useEffect(() => {
+  setUserPostcomment_likedata([]);
+}, []);
 
 
   // --------------------------------------
@@ -138,7 +208,12 @@ const newUser: UserProfile = {
         AddUserProfile,
         FetchProfliledata,
         isProfilemodelOpen,
-    setisProfilemodelOpen,AddPost,FetchUserPosts
+        setisProfilemodelOpen,
+        AddPost,
+        FetchUserPosts,
+        FollowUser,
+        UnfollowUser,
+        CheckIsFollowing,
       }}
     >
       {children}

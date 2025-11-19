@@ -1,21 +1,21 @@
 import { useContext } from "react";
 import { createContext } from "react";
-import type{ UserAuthContext,User } from "../Helper/Type";
+import type{ UserAuthContext } from "../Helper/Type";
 
 export const AuthContext=createContext<UserAuthContext>({
     Userdata:[],
-        AddUser:(data:Omit<User, "Id">)=>false,
-        FetchProflile:(Email:string,Password:string)=>null,
+        AddUser:()=>false,
+        FetchProflile:()=>null,
         isModalOpen:false,
-     setIsModalOpen:( value: boolean ) => {},
+     setIsModalOpen:(  ) => {},
      isslideOpen:false,
-      setIsSlideOpen:( value: boolean ) => {},
+      setIsSlideOpen:(  ) => {},
       imageFile:"",
-       setImageFile:( value: any ) => {},
+       setImageFile:( ) => {},
        CurrentUser:null,
-        setCurrentUser:( value: User|null ) => {} ,
+        setCurrentUser:(  ) => {} ,
          activeAction:"",
-         setActiveAction:( value: string ) => {}
+         setActiveAction:(  ) => {}
        
 })
 export const AuthContextProvider=AuthContext.Provider;

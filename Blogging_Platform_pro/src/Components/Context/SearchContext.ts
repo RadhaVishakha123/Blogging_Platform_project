@@ -4,8 +4,8 @@ import type{ SearchContextType } from "../Helper/Type";
 
 export const SearchContext=createContext<SearchContextType>({
     query:"",
-    setQuery:(value:string)=>{},
-    Searchdata:(username:string)=>[]
+    setQuery:()=>{},
+    Searchdata:()=>[]
 })
 export const SearchContextProvider=SearchContext.Provider;
 export default function useSearch(){

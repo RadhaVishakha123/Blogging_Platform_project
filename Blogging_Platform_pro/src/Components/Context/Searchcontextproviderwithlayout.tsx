@@ -11,7 +11,7 @@ export default function Searchcontextproviderwithlayout({
 }){
     const {CurrentUser,Userdata}=useAuth();
     const {UserProfiledata}=useUserProfile();
-    if(!CurrentUser)return;
+    
 
    const[query, setQuery] = useState("");
     const mergedUsers = useMemo(() => {

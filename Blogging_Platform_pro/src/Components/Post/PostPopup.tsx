@@ -10,7 +10,7 @@ export default function PostPopup() {
     setIsModalOpen,
     imageFile,
     setImageFile,
-    CurrentUser,activeAction,setActiveAction
+    CurrentUser,setActiveAction
   } = useAuth();
 
   const { AddPost } = useUserProfile();
@@ -51,7 +51,7 @@ export default function PostPopup() {
     imageUrl,
     userId: CurrentUser.Id,
   });
-setActiveAction("Profile");
+// setActiveAction("Profile");
   setCaption("");
   setImageFile(null);
   setIsModalOpen(false);
@@ -67,7 +67,7 @@ setActiveAction("Profile");
           setImageFile(null);
           setCaption("");
           setIsModalOpen(false);
-          setActiveAction("Profile");
+          // setActiveAction("Profile");
         }}
         centered
         rootClassName="custom-modal"
