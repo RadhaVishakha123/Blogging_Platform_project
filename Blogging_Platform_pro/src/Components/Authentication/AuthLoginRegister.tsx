@@ -1,31 +1,39 @@
 import { useState } from "react";
-import { Form, Input, Button, Typography, message, Card } from "antd";
+import { Form, Input, Button, Typography, Card } from "antd";
 import { useMediaQuery } from "react-responsive";
-import "antd/dist/reset.css";
 import useAuth from "../Context/AuthContext";
 import Bloglog from "../../assets/Bloglog.png";
+import { useNavigate } from "react-router-dom";
+import { App } from "antd";
 
 const { Title, Text } = Typography;
 
 export default function AuthLoginRegister() {
-  const { AddUser } = useAuth();
+  const message = App.useApp().message;
+  const { AddUser, FetchProflile } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
-const [form]=Form.useForm();//Create a form instance
+  const [form] = Form.useForm(); //Create a form instance
+  const navigate = useNavigate();
   const onFinish = (values: any) => {
     console.log("Form Submitted:", values);
-    
+
     if (isLogin) {
-
-    } 
-    else {
+      const user = FetchProflile(values.Email, values.Password);
+      if (!user) return;
+      else {
+        message.success(`Welcome back, ${user.Username}!`);
+        setIsLogin(false);
+        form.resetFields();
+        navigate("/Home");
+      }
+    } else {
       const { cPassword, ...rest } = values;
-      const found:boolean=AddUser(rest);
-      if(!found)return;
-      else{
-      form.resetFields();
-
-      setIsLogin(true);
+      const found: boolean = AddUser(rest);
+      if (!found) return;
+      else {
+        form.resetFields();
+        setIsLogin(true);
       }
     }
   };
@@ -89,11 +97,11 @@ const [form]=Form.useForm();//Create a form instance
           >
             {!isLogin && (
               <Form.Item
-                label={<span className="text-white">Full Name</span>}
+                label={<span className="text-white">Usarname</span>}
                 name="Username"
                 rules={[{ required: true, message: "Please enter your name!" }]}
               >
-                <Input placeholder="John Doe" size="large" />
+                <Input placeholder="John32 " size="large" />
               </Form.Item>
             )}
 
