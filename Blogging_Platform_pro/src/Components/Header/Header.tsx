@@ -7,31 +7,34 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
 } from "@ant-design/icons";
-import useAuth from "../Context/AuthContext";
-import { Drawer, Input } from "antd";
+import { Drawer, Input,Button } from "antd";
 import { LoginOutlined } from "@ant-design/icons";
-import PostPopup from "../Post/PostPopup";
+import PostModal from "../post/modal/PostModal";
 import { useNavigate } from "react-router-dom";
-import useSearch from "../Context/SearchContext";
 import Default_User from "../../assets/Default_User.jpg";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import type { UserProfile, User } from "../../Helper/Type";
+import { unfollowUser,followUser,checkIsFollowing } from "../../Helper/utility";
+import useUser from "../../hooks/useUser";
+import { useDebounce } from "use-debounce";
+
 import { useState } from "react";
 
 export default function Header() {
-  const {
-    setIsModalOpen,
-    isslideOpen,
-    setIsSlideOpen,
-    setCurrentUser,
-    activeAction,
-    setActiveAction,
-  } = useAuth();
-
-  const { setQuery, query, Searchdata } = useSearch();
+  const { setCurrentLoggedInUserData } = useUser();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isSlideOpen, setIsSlideOpen] = useState<boolean>(false);
+ const {currentLoggedInUserData}=useUser();
+  const [query, setQuery] = useState<string>("");
+  const [debouncedQuery]=useDebounce(query,500)
   const navigate = useNavigate();
   const isMobile = window.innerWidth < 768;
   const [isHumburgerMenuOpen, setHumburgerMenuOpen] = useState<boolean>(false);
-
+  const [refreshFollow, setRefreshFollow] = useState<boolean>(false);
+  const userRegisterData =
+    JSON.parse(localStorage.getItem("userRegisterData") ?? "[]") || [];
+  const userProfileData =
+    JSON.parse(localStorage.getItem("userProfileData") ?? "[]") || [];
   const MenuItems = [
     { name: "Home", icon: <HomeOutlined />, path: "/Home" },
     {
@@ -39,7 +42,6 @@ export default function Header() {
       icon: <SearchOutlined />,
       action: () => {
         setIsSlideOpen(true);
-        setActiveAction("Search");
       },
     },
     {
@@ -47,17 +49,42 @@ export default function Header() {
       icon: <PlusCircleOutlined />,
       action: () => {
         setIsModalOpen(true);
-        setActiveAction("Create");
       },
     },
   ];
-  function logoutHandelr() {
-    setCurrentUser(null);
+  function handleLogout() {
+    setCurrentLoggedInUserData(null);
+    navigate("/");
+  }
+  const mergedUsers = useMemo(() => {
+    return userRegisterData.map((user: User) => {
+      const profile: UserProfile | undefined = userProfileData.find(
+        (p: UserProfile) => p.userId === user.id
+      );
+      return {
+        userId: user.id,
+        username: user.username,
+        fullName: profile?.fullName || "",
+        profilePic: profile?.profilePic || "",
+        bio: profile?.bio || "",
+        accountType: profile?.accountType || "public",
+      };
+    });
+  }, [userRegisterData, userProfileData]);
+
+  function searchUser(searchText: string) {
+    if (!searchText.trim()) return [];
+
+    const lowerQuery = searchText.toLowerCase();
+
+    return mergedUsers.filter((user: any) =>
+      user.username.toLowerCase().includes(lowerQuery)
+    );
   }
 
   return (
     <>
-      <header className="w-full bg-black text-white flex items-center justify-between z-50 px-4 py-3 shadow-md">
+      <header className="w-full bg-black top-0 fixed text-white flex items-center justify-between z-50 px-4 py-3 shadow-md">
         <button
           className="md:hidden text-white text-7xl"
           onClick={() => setHumburgerMenuOpen(true)}
@@ -74,7 +101,6 @@ export default function Header() {
 
         <div className=" flex ">
           <NavLink to="/UserProfile">
-            
             <div
               className={`
                   w-12 h-12 flex items-center justify-center rounded-xl
@@ -84,7 +110,7 @@ export default function Header() {
               <UserOutlined />
             </div>
           </NavLink>
-          <NavLink to="/" onClick={() => logoutHandelr}>
+          <NavLink to="/" onClick={() => handleLogout}>
             <div
               className={`
                   w-12 h-12 flex items-center justify-center rounded-xl
@@ -104,20 +130,12 @@ export default function Header() {
               <NavLink
                 key={item.name}
                 to={item.path}
-                onClick={() => {
-                  setActiveAction(item.name);
-                  // item.action?.();
-                }}
                 className="flex justify-center"
               >
                 <div
                   className={`
                     w-12 h-12 flex items-center justify-center rounded-xl text-xl
-                    ${
-                      activeAction === item.name
-                        ? "bg-gray-700 text-white"
-                        : " text-gray-300"
-                    }
+                    text-white
                     hover:bg-gray-800 transition
                   `}
                 >
@@ -128,7 +146,6 @@ export default function Header() {
               <div
                 key={item.name}
                 onClick={() => {
-                  setActiveAction(item.name);
                   item.action?.();
                 }}
                 className="flex justify-center cursor-pointer"
@@ -136,11 +153,7 @@ export default function Header() {
                 <div
                   className={`
                     w-12 h-12 flex items-center justify-center rounded-xl text-xl
-                    ${
-                      activeAction === item.name
-                        ? "bg-gray-700 text-white"
-                        : " text-gray-300"
-                    }
+                    text-white
                     hover:bg-gray-800 transition
                   `}
                 >
@@ -160,7 +173,6 @@ export default function Header() {
         width={100}
         className=" !bg-black top-6 !md:hidden !mt-10"
         onClose={() => setHumburgerMenuOpen(false)}
-        
         closable={false}
         headerStyle={{ display: "none", margin: 0, padding: 0 }}
       >
@@ -170,20 +182,12 @@ export default function Header() {
               <NavLink
                 key={item.name}
                 to={item.path}
-                onClick={() => {
-                  setActiveAction(item.name);
-                  // item.action?.();
-                }}
                 className="flex flex-col items-center"
               >
                 <div
                   className={`
                   w-12 h-12 flex items-center justify-center rounded-xl
-                  ${
-                    activeAction === item.name
-                      ? "bg-gray-700 text-white"
-                      : " text-gray-300"
-                  }
+                  text-white
                    hover:bg-gray-800 transition
                 `}
                 >
@@ -194,7 +198,6 @@ export default function Header() {
               <div
                 key={item.name}
                 onClick={() => {
-                  setActiveAction(item.name);
                   item.action?.();
                 }}
                 className="flex flex-col items-center cursor-pointer"
@@ -202,11 +205,7 @@ export default function Header() {
                 <div
                   className={`
                   w-12 h-12 flex items-center justify-center rounded-xl
-                  ${
-                    activeAction === item.name
-                      ? "bg-gray-700 text-gray-300"
-                      : " text-gray-300"
-                  }
+                  text-white
                    hover:bg-gray-800 transition
                 `}
                 >
@@ -221,14 +220,13 @@ export default function Header() {
       {/* SEARCH DRAWER */}
       <Drawer
         title="Search"
-        open={isslideOpen}
+        open={isSlideOpen}
         placement={isMobile ? "top" : "left"}
         height={isMobile ? "40vh" : undefined}
         width={isMobile ? "100%" : 350}
         onClose={() => {
           setIsSlideOpen(false);
           setQuery("");
-          // setActiveAction("Home");
         }}
       >
         <Input.Search
@@ -244,45 +242,78 @@ export default function Header() {
         {/* Search results */}
         {query.trim() !== "" && (
           <div className="space-y-3">
-            {Searchdata(query).length === 0 ? (
+            {searchUser(debouncedQuery).length === 0 ? (
               <p className="text-gray-500 text-center">No users found.</p>
             ) : (
-              Searchdata(query).map((user) => (
+              searchUser(debouncedQuery).map((user: any) => (
                 <div
-                  key={user.userId}
-                  className="flex items-center gap-3 p-2 bg-black rounded hover:bg-gray-800 cursor-pointer"
-                  onClick={() => {
-                    setIsSlideOpen(false);
-                    setQuery("");
-                    // Navigate to the user's profile page
-                    // Example using React Router:
-                    // setActiveAction("");
-                    navigate(`/UserProfile`, {
-                      state: {
-                        from: "search",
-                        userId: user.userId,
-                        username: user.username,
-                      },
-                    });
-                  }}
-                >
-                  <img
-                    src={user.profilePic ? user.profilePic : Default_User}
-                    alt={user.fullName}
-                    className="w-10 h-10 rounded-full object-cover border border-gray-600"
-                  />
-                  <div className="text-white">
-                    <p className="font-semibold">{user.username}</p>
-                    <p className="text-gray-400 text-sm">{user.fullName}</p>
-                  </div>
-                </div>
+  key={user.userId}
+  className="flex items-center justify-between p-3 bg-black rounded-lg hover:bg-gray-800 cursor-pointer"
+>
+  {/* LEFT SIDE — IMAGE + TEXT */}
+  <div
+    className="flex items-center gap-3"
+    onClick={() => {
+      setIsSlideOpen(false);
+      setQuery("");
+
+      navigate(`/UserProfile`, {
+        state: {
+          from: "search",
+          userId: user.userId,
+          username: user.username,
+        },
+      });
+    }}
+  >
+    <img
+      src={user.profilePic ? user.profilePic : Default_User}
+      alt={user.fullName}
+      className="w-12 h-12 rounded-full object-cover border border-gray-600"
+    />
+
+    <div className="text-white">
+      <p className="font-semibold text-base">{user.username}</p>
+      <p className="text-gray-400 text-sm">{user.fullName}</p>
+    </div>
+  </div>
+
+  {/* RIGHT SIDE — BUTTON */}
+  {currentLoggedInUserData && user.userId !== currentLoggedInUserData?.id && (
+    <Button
+      type={
+        checkIsFollowing(currentLoggedInUserData?.id, user.userId)
+          ? "default"
+          : "primary"
+      }
+      className={`${
+        checkIsFollowing(currentLoggedInUserData?.id, user.userId)
+          ? "bg-gray-800 text-white border-gray-700"
+          : "bg-blue-600 hover:bg-blue-700 border-none"
+      }`}
+      onClick={() => {
+        if (checkIsFollowing(currentLoggedInUserData.id, user.userId)) {
+          unfollowUser(currentLoggedInUserData.id, user.userId);
+        } else {
+          followUser(currentLoggedInUserData.id, user.userId);
+        }
+        setRefreshFollow((prev) => !prev);
+      }}
+    >
+      {checkIsFollowing(currentLoggedInUserData.id, user.userId)
+        ? "Unfollow"
+        : "Follow"}
+    </Button>
+  )}
+</div>
+
               ))
             )}
           </div>
         )}
       </Drawer>
 
-      <PostPopup />
+      <PostModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
     </>
   );
 }

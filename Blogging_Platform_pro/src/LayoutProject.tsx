@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
-import Header from "./Components/Header/Header"
-import Protected from "./Protected" 
+import Header from "./Components/header/Header"
+import Protected from "./ProtectedRoute" 
 export default function LayoutProject(){
     return(
         <>

@@ -1,22 +1,36 @@
 import { Modal, Input, Upload, Button } from "antd";
 import { UploadOutlined, DeleteOutlined } from "@ant-design/icons";
-import useAuth from "../Context/AuthContext";
-import useUserProfile from "../Context/UserProfileContext";
-import { useState } from "react";
-
-export default function PostPopup() {
-  const {
-    isModalOpen,
-    setIsModalOpen,
-    imageFile,
-    setImageFile,
-    CurrentUser,setActiveAction
-  } = useAuth();
-
-  const { AddPost } = useUserProfile();
-
+import useUser from "../../../hooks/useUser";
+import { fileToBase64 } from "../../../Helper/utility";
+import { useEffect, useState } from "react";
+import type { PostPopupProps, UserPost } from "../../../Helper/Type";
+import { nanoid } from "nanoid";
+import { App } from "antd";
+export default function PostModal({
+  isModalOpen,
+  setIsModalOpen,
+}: PostPopupProps) {
+  const { currentLoggedInUserData } = useUser();
+  const [imageFile, setImageFile] = useState<File | null>();
   const [caption, setCaption] = useState("");
-
+  const [userPostData, setUserPostData] = useState<UserPost[]>(() => {
+    return JSON.parse(localStorage.getItem("userPostData") ?? "[]") || [];
+  });
+  const message = App.useApp().message;
+  function addPostData(postData: any) {
+    const uid = currentLoggedInUserData?.id;
+    if (!uid) return false;
+    const postId = nanoid(10);
+    const newPost: UserPost = {
+      postId,
+      userId: uid,
+      content: postData.content,
+      imageUrl: postData.imageUrl,
+      createdAt: new Date(),
+    };
+    setUserPostData((prev) => [newPost, ...prev]);
+    message.success("Post added successfully!");
+  }
   const uploadProps = {
     beforeUpload: (file: any) => {
       setImageFile(file);
@@ -26,37 +40,33 @@ export default function PostPopup() {
     showUploadList: false,
     maxCount: 1,
   };
-  function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-}
-
 
   // ----------------- SUBMIT POST -----------------
   async function handleSubmit() {
-  if (!CurrentUser) return;
+    if (!currentLoggedInUserData) return;
+    let imageUrl = "";
+    if (!imageFile) {
+      message.warning("Please upload an image to continue.");
+    }
+    // else if(caption==""){
+    //   message.warning("A caption is required to create this post.")
+    // }
+    else if (imageFile) {
+      imageUrl = await fileToBase64(imageFile);
 
-  let imageUrl = "";
-
-  if (imageFile) {
-    imageUrl = await fileToBase64(imageFile);
+      addPostData({
+        content: caption,
+        imageUrl,
+      });
+      // setActiveAction("Profile");
+      setCaption("");
+      setImageFile(null);
+      setIsModalOpen(false);
+    }
   }
-
-  AddPost({
-    content: caption,
-    imageUrl,
-    userId: CurrentUser.Id,
-  });
-// setActiveAction("Profile");
-  setCaption("");
-  setImageFile(null);
-  setIsModalOpen(false);
-}
-
+  useEffect(() => {
+    localStorage.setItem("userPostData", JSON.stringify(userPostData));
+  }, [userPostData]);
 
   return (
     <>
@@ -78,7 +88,6 @@ export default function PostPopup() {
         )}
       >
         <div className="text-white">
-
           <h2 className="text-lg font-bold mb-3">Create Post</h2>
 
           {/* CAPTION */}
@@ -126,7 +135,6 @@ export default function PostPopup() {
           >
             Submit
           </Button>
-
         </div>
       </Modal>
     </>

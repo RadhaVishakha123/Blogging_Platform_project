@@ -1,14 +1,14 @@
-import useAuth from "./Components/Context/AuthContext";
+import useUser from "./hooks/useUser";
 import { useNavigate } from "react-router-dom";
 export default function Protected({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { CurrentUser } = useAuth();
+  const { currentLoggedInUserData} =useUser();
   const navigate = useNavigate();
 
-  if (!CurrentUser) {
+  if (!currentLoggedInUserData) {
     // 
     navigate("/");
   }

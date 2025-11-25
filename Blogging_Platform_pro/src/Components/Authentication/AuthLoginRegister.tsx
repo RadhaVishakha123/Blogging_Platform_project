@@ -1,35 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Input, Button, Typography, Card } from "antd";
 import { useMediaQuery } from "react-responsive";
-import useAuth from "../Context/AuthContext";
+import useUser from "../../hooks/useUser";
 import Bloglog from "../../assets/Bloglog.png";
 import { useNavigate } from "react-router-dom";
 import { App } from "antd";
+import type { User } from "../../Helper/Type";
+import { nanoid } from "nanoid";
 
 const { Title, Text } = Typography;
 
 export default function AuthLoginRegister() {
   const message = App.useApp().message;
-  const { AddUser, FetchProflile } = useAuth();
+  const { setCurrentLoggedInUserData } = useUser();
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const [form] = Form.useForm(); //Create a form instance
+  const [userRegisterData, setUserRegisterData] = useState<User[]>(() => {
+    return JSON.parse(localStorage.getItem("userRegisterData") ?? "[]") || [];
+  });
   const navigate = useNavigate();
+  // User Register Function
+  function registerUser(data: Omit<User, "id">) {
+    const id = nanoid(10);
+    const found = userRegisterData.some(
+      (user) =>
+        user.email.trim().toLowerCase() == data.email.trim().toLowerCase() ||
+        user.username.trim().toLowerCase() == data.username.trim().toLowerCase()
+    );
+
+    if (found) {
+      //Alert is work in react return() not in function,and message is work in function and aslo in return()
+      message.error("User with this email or username already exists");
+      return false;
+    } else {
+      setUserRegisterData((prev) => [{ id: id, ...data }, ...prev]);
+      message.success("Registration successful! Please log in.");
+      return true;
+    }
+  }
+  //User Login Function
+  function loginUser(email: string, password: string): User | null {
+    const user = userRegisterData.find(
+      (user) => user.email === email && user.password === password
+    );
+    if (!user) {
+      message.error("Invalid email or password");
+      return null;
+    }
+    setCurrentLoggedInUserData(user);
+    return user;
+  }
+  //Ant Design Form callback fun call, after validation rules return success
   const onFinish = (values: any) => {
     console.log("Form Submitted:", values);
-
     if (isLogin) {
-      const user = FetchProflile(values.Email, values.Password);
+      const user = loginUser(values.email, values.password);
       if (!user) return;
       else {
-        message.success(`Welcome back, ${user.Username}!`);
+        message.success(`Welcome , ${user.username}!`);
         setIsLogin(false);
         form.resetFields();
         navigate("/Home");
       }
     } else {
-      const { cPassword, ...rest } = values;
-      const found: boolean = AddUser(rest);
+      const { confirmPassword, ...rest } = values;
+      const found: boolean = registerUser(rest);
       if (!found) return;
       else {
         form.resetFields();
@@ -37,6 +73,9 @@ export default function AuthLoginRegister() {
       }
     }
   };
+  useEffect(() => {
+    localStorage.setItem("userRegisterData", JSON.stringify(userRegisterData));
+  }, [userRegisterData]);
 
   return (
     <div
@@ -98,7 +137,7 @@ export default function AuthLoginRegister() {
             {!isLogin && (
               <Form.Item
                 label={<span className="text-white">Usarname</span>}
-                name="Username"
+                name="username"
                 rules={[{ required: true, message: "Please enter your name!" }]}
               >
                 <Input placeholder="John32 " size="large" />
@@ -107,7 +146,7 @@ export default function AuthLoginRegister() {
 
             <Form.Item
               label={<span className="text-white">Email</span>}
-              name="Email"
+              name="email"
               rules={[
                 { required: true, message: "Please enter your email!" },
                 {
@@ -121,7 +160,7 @@ export default function AuthLoginRegister() {
 
             <Form.Item
               label={<span className="text-white">Password</span>}
-              name="Password"
+              name="password"
               rules={[
                 { required: true, message: "Please enter your password!" },
                 {
@@ -135,12 +174,12 @@ export default function AuthLoginRegister() {
             {!isLogin && (
               <Form.Item
                 label={<span className="text-white">Comfirm Password</span>}
-                name="cPassword"
+                name="confirmPassword"
                 rules={[
                   { required: true, message: "Please confirm your password!" },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (!value || getFieldValue("Password") == value) {
+                      if (!value || getFieldValue("password") == value) {
                         return Promise.resolve();
                       }
                       return Promise.reject(

@@ -1,12 +1,10 @@
-import AuthLoginRegister from "./Components/Authentication/AuthLoginRegister";
+import AuthLoginRegister from "./Components/authentication/AuthLoginRegister";
+import UserContextProvider from "./contexts/UserContext";
 import { createBrowserRouter } from "react-router-dom";
 import { RouterProvider } from "react-router-dom";
-import AuthContextProviderWithLayout from "./Components/Context/AuthContextProviderWithLayout";
 import LayoutProeject from "./LayoutProject";
-import Home from "./Components/Home/Home";
-import UserProfile from "./Components/User/UserProfile";
-import UserProfileContextWithlayout from "./Components/Context/UserProfileContextWithlayout";
-import Searchcontextproviderwithlayout from "./Components/Context/Searchcontextproviderwithlayout";
+import Home from "./Components/home/Home";
+import UserProfile from "./Components/userProfile/UserProfile";
 function App() {
   const router = createBrowserRouter([
     { path: "/", element: <AuthLoginRegister /> },
@@ -20,13 +18,11 @@ function App() {
   ]);
   return (
     <>
-      <AuthContextProviderWithLayout>
-        <UserProfileContextWithlayout>
-          <Searchcontextproviderwithlayout>
-            <RouterProvider router={router}></RouterProvider>
-          </Searchcontextproviderwithlayout>
-        </UserProfileContextWithlayout>
-      </AuthContextProviderWithLayout>
+      <UserContextProvider>
+          <RouterProvider router={router}></RouterProvider>
+      </UserContextProvider>   
+{/* <UserContextProvider><AuthLoginRegister/></UserContextProvider>
+       */}
     </>
   );
 }
