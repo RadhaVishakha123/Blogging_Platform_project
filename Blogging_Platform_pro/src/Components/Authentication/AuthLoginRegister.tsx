@@ -12,7 +12,7 @@ const { Title, Text } = Typography;
 
 export default function AuthLoginRegister() {
   const message = App.useApp().message;
-  const { setCurrentLoggedInUserData } = useUser();
+  const { setCurrentLoggedInUserData,loading,currentLoggedInUserData } = useUser();
   const [isLogin, setIsLogin] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const [form] = Form.useForm(); //Create a form instance
@@ -21,53 +21,81 @@ export default function AuthLoginRegister() {
   });
   const navigate = useNavigate();
   // User Register Function
-  function registerUser(data: Omit<User, "id">) {
-    const id = nanoid(10);
-    const found = userRegisterData.some(
-      (user) =>
-        user.email.trim().toLowerCase() == data.email.trim().toLowerCase() ||
-        user.username.trim().toLowerCase() == data.username.trim().toLowerCase()
-    );
+  async function registerUser(data:any) {
+    // const id = nanoid(10);
+    // const found = userRegisterData.some(
+    //   (user) =>
+    //     user.email.trim().toLowerCase() == data.email.trim().toLowerCase() ||
+    //     user.username.trim().toLowerCase() == data.username.trim().toLowerCase()
+    // );
 
-    if (found) {
-      //Alert is work in react return() not in function,and message is work in function and aslo in return()
-      message.error("User with this email or username already exists");
-      return false;
-    } else {
-      setUserRegisterData((prev) => [{ id: id, ...data }, ...prev]);
-      message.success("Registration successful! Please log in.");
-      return true;
-    }
+    // if (found) {
+    //   //Alert is work in react return() not in function,and message is work in function and aslo in return()
+    //   message.error("User with this email or username already exists");
+    //   return false;
+    // } else {
+    //   setUserRegisterData((prev) => [{ id: id, ...data }, ...prev]);
+    //   message.success("Registration successful! Please log in.");
+    //   return true;
+    // }
+    const res=await fetch("http://localhost:8000/api/auth/register",{
+      method:"POST",
+      headers:{ "Content-Type": "application/json" },
+      body:JSON.stringify(data)
+    });
+    return res.json();
+
   }
   //User Login Function
-  function loginUser(email: string, password: string): User | null {
-    const user = userRegisterData.find(
-      (user) => user.email === email && user.password === password
-    );
-    if (!user) {
-      message.error("Invalid email or password");
-      return null;
-    }
-    setCurrentLoggedInUserData(user);
-    return user;
+  async function loginUser(data:any) {
+    // const user = userRegisterData.find(
+    //   (user) => user.email === email && user.password === password
+    // );
+    // if (!user) {
+    //   message.error("Invalid email or password");
+    //   return null;
+    // }
+    // setCurrentLoggedInUserData(user);
+    // return user;
+    console.log("data in login api call send",data)
+const res=await fetch("http://localhost:8000/api/auth/login",{
+      method:"POST",
+      credentials: "include",  
+      headers:{ "Content-Type": "application/json" },
+      body:JSON.stringify(data)
+    });
+    return res.json();
   }
   //Ant Design Form callback fun call, after validation rules return success
-  const onFinish = (values: any) => {
+  const onFinish = async(values: any) => {
     console.log("Form Submitted:", values);
     if (isLogin) {
-      const user = loginUser(values.email, values.password);
-      if (!user) return;
+      const response:any =await loginUser({   email: values.email,
+      password: values.password,});
+      console.log("login responce:",response)
+      if (response.message !== "Login success") {
+         message.error(response.message);
+      return;
+      }
       else {
-        message.success(`Welcome , ${user.username}!`);
+        message.success(`Welcome `);
+        setCurrentLoggedInUserData({accessToken: response.accessToken,
+  user: response.user})
+  document.cookie = `refreshToken=${response.refreshToken}; Path=/; Max-Age=${7 * 24 * 60 * 60}`;
         setIsLogin(false);
         form.resetFields();
         navigate("/Home");
       }
     } else {
       const { confirmPassword, ...rest } = values;
-      const found: boolean = registerUser(rest);
-      if (!found) return;
+      const response:any =await registerUser(rest);
+      console.log("register responce:",response)
+      if (response.message !== "User registered"){ 
+        message.error(response.message);
+      return;}
+
       else {
+        message.success("Registration successful!");
         form.resetFields();
         setIsLogin(true);
       }
@@ -76,7 +104,14 @@ export default function AuthLoginRegister() {
   useEffect(() => {
     localStorage.setItem("userRegisterData", JSON.stringify(userRegisterData));
   }, [userRegisterData]);
+useEffect(() => {
+  if (loading) return; // wait for refresh check
 
+  // 👇 If user already logged in, redirect to Home
+  if (currentLoggedInUserData) {
+    navigate("/Home");
+  }
+}, [currentLoggedInUserData, loading]);
   return (
     <div
       className={`flex min-h-screen ${

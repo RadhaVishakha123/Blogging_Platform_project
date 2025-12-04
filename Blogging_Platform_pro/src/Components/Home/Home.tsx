@@ -21,12 +21,12 @@ export default function Home() {
   const [selectedPost, setselectedPost] = useState<any>(null);
   const message = App.useApp().message;
   function commentHandler(post: any) {
-    console.log("data post", post);
+   
     setIsModalOpen(true);
     setselectedPost(post);
     setCommentText("");
   }
-  const loggedInUserId = currentLoggedInUserData?.id ?? "";
+  const loggedInUserId = currentLoggedInUserData?.user._id ?? "";
   const [refreshLikes, setRefreshLikes] = useState(false);
   const [allPosts, setAllPosts] = useState<any[]>([]);
   const [visiblePosts, setVisiblePosts] = useState<any[]>([]);
@@ -94,7 +94,6 @@ export default function Home() {
       message.warning("Comment cannot be empty");
       return;
     }
-    console.log("userid from home:", selectedPost);
     const updateData=addComment(selectedPost.postId, commentText,loggedInUserId,userPostCommentData);
     setUserPostCommentData(updateData)
     

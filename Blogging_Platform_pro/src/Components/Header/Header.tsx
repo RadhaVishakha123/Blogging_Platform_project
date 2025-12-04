@@ -52,12 +52,19 @@ export default function Header() {
       },
     },
   ];
-  function handleLogout() {
+  async function handleLogout() {
     setCurrentLoggedInUserData(null);
     navigate("/");
+    const res=await fetch("http://localhost:8000/api/auth/logout",{
+      method:"DELETE",
+      credentials: "include"
+    });
+    document.cookie = "refreshToken=; Path=/; Max-Age=0";
+    //return res.json();
+    console.log("delete api :",res);
   }
   const mergedUsers = useMemo(() => {
-    return userRegisterData.map((user: User) => {
+    return userRegisterData.map((user: any) => {
       const profile: UserProfile | undefined = userProfileData.find(
         (p: UserProfile) => p.userId === user.id
       );
@@ -110,7 +117,7 @@ export default function Header() {
               <UserOutlined />
             </div>
           </NavLink>
-          <NavLink to="/" onClick={() => handleLogout}>
+          <NavLink to="/" onClick={(e) =>{e.preventDefault();  handleLogout()}}>
             <div
               className={`
                   w-12 h-12 flex items-center justify-center rounded-xl
@@ -279,28 +286,28 @@ export default function Header() {
   </div>
 
   {/* RIGHT SIDE — BUTTON */}
-  {currentLoggedInUserData && user.userId !== currentLoggedInUserData?.id && (
+  {currentLoggedInUserData && user.userId !== currentLoggedInUserData?.user._id && (
     <Button
       type={
-        checkIsFollowing(currentLoggedInUserData?.id, user.userId)
+        checkIsFollowing(currentLoggedInUserData?.user._id, user.userId)
           ? "default"
           : "primary"
       }
       className={`${
-        checkIsFollowing(currentLoggedInUserData?.id, user.userId)
+        checkIsFollowing(currentLoggedInUserData?.user._id, user.userId)
           ? "bg-gray-800 text-white border-gray-700"
           : "bg-blue-600 hover:bg-blue-700 border-none"
       }`}
       onClick={() => {
-        if (checkIsFollowing(currentLoggedInUserData.id, user.userId)) {
-          unfollowUser(currentLoggedInUserData.id, user.userId);
+        if (checkIsFollowing(currentLoggedInUserData?.user._id, user.userId)) {
+          unfollowUser(currentLoggedInUserData?.user._id, user.userId);
         } else {
-          followUser(currentLoggedInUserData.id, user.userId);
+          followUser(currentLoggedInUserData?.user._id, user.userId);
         }
         setRefreshFollow((prev) => !prev);
       }}
     >
-      {checkIsFollowing(currentLoggedInUserData.id, user.userId)
+      {checkIsFollowing(currentLoggedInUserData?.user._id, user.userId)
         ? "Unfollow"
         : "Follow"}
     </Button>

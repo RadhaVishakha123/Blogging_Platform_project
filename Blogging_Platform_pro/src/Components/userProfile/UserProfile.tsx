@@ -50,7 +50,7 @@ export default function UserProfile() {
   const [userProfileData, setUserProfileData] = useState<UserProfile[]>(() => {
     return JSON.parse(localStorage.getItem("userProfileData") ?? "[]") || [];
   });
-  const loggedInUserId = currentLoggedInUserData?.id ?? "";
+  const loggedInUserId = currentLoggedInUserData?.user._id ?? "";
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
   const [userPosts, setUserPosts] = useState<any[]>([]);
@@ -75,10 +75,10 @@ export default function UserProfile() {
     userId?: string;
     username?: string;
   };
-  const profileUserId = state?.userId ?? currentLoggedInUserData?.id; // Use clicked user or current user
-  const profileUsername = state?.username || currentLoggedInUserData?.username;
+  const profileUserId = state?.userId ??currentLoggedInUserData?.user._id ; // Use clicked user or current user
+  const profileUsername = state?.username || currentLoggedInUserData?.user.username;
   const [isFollowing, setIsFollowing] = useState<boolean>(
-    checkIsFollowing(currentLoggedInUserData?.id || "", profileUserId || "")
+    checkIsFollowing(currentLoggedInUserData?.user._id  || "", profileUserId || "")
   );
 
   const FollowerCount =
@@ -103,7 +103,7 @@ export default function UserProfile() {
   // ADD USER PROFILE
   // ---------------------------
   function addUserProfile(data: Omit<UserProfile, "userId">): boolean {
-    const uid = currentLoggedInUserData?.id;
+    const uid = currentLoggedInUserData?.user._id ;
     if (!uid) return false;
     const newUser: UserProfile = {
       userId: uid,
@@ -164,7 +164,7 @@ export default function UserProfile() {
   //   if (!userDetails) return null;
 
   const isPrivate = userDetails?.accountType === "private";
-  const isOwner = currentLoggedInUserData?.id === profileUserId;
+  const isOwner = currentLoggedInUserData?.user._id  === profileUserId;
 
   // TEMP DATA (for input editing)
   const [tempData, setTempData] = useState<Omit<UserProfile, "userId">>({
@@ -230,7 +230,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (isProfileModelOpen && currentLoggedInUserData) {
-      const profile = fetchUserProflile(currentLoggedInUserData.id);
+      const profile = fetchUserProflile(currentLoggedInUserData?.user._id );
       setTempData({
         fullName: profile.fullName,
         bio: profile.bio,
@@ -240,7 +240,7 @@ export default function UserProfile() {
     }
   }, [isProfileModelOpen]);
   useEffect(() => {
-    if (!imageFile || profileUserId !== currentLoggedInUserData?.id) return;
+    if (!imageFile || profileUserId !==currentLoggedInUserData?.user._id ) return;
 
     (async () => {
       const imageUrl = await fileToBase64(imageFile);
@@ -269,7 +269,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     setIsFollowing(
-      checkIsFollowing(currentLoggedInUserData?.id || "", profileUserId || "")
+      checkIsFollowing(currentLoggedInUserData?.user._id || "", profileUserId || "")
     );
   }, [refreshFollow, profileUserId]);
 
@@ -372,7 +372,7 @@ export default function UserProfile() {
             onClick={() => {
               if (isFollowing) {
                 const result = unfollowUser(
-                  currentLoggedInUserData.id,
+                  currentLoggedInUserData?.user._id ,
                   profileUserId!
                 );
                 setUserFollowerData(result.userFollowerData);
@@ -380,7 +380,7 @@ export default function UserProfile() {
                 setRefreshFollow((prev) => !prev);
               } else {
                 const result = followUser(
-                  currentLoggedInUserData.id,
+                  currentLoggedInUserData?.user._id ,
                   profileUserId!
                 );
                 setUserFollowerData(result.userFollowerData);
@@ -524,12 +524,12 @@ export default function UserProfile() {
                 <div>
                   <Button
                     type={
-                      checkIsFollowing(currentLoggedInUserData?.id, item.userId)
+                      checkIsFollowing(currentLoggedInUserData?.user._id , item.userId)
                         ? "default"
                         : "primary"
                     }
                     className={`${
-                      checkIsFollowing(currentLoggedInUserData?.id, item.userId)
+                      checkIsFollowing(currentLoggedInUserData?.user._id , item.userId)
                         ? "bg-gray-800 text-white border-gray-700"
                         : "bg-blue-600 hover:bg-blue-700 border-none"
                     }`}
@@ -537,17 +537,17 @@ export default function UserProfile() {
                       let result;
                       if (
                         checkIsFollowing(
-                          currentLoggedInUserData.id,
+                          currentLoggedInUserData?.user._id ,
                           item.userId
                         )
                       ) {
                         result = unfollowUser(
-                          currentLoggedInUserData.id,
+                          currentLoggedInUserData?.user._id ,
                           item.userId
                         );
                       } else {
                         result = followUser(
-                          currentLoggedInUserData.id,
+                          currentLoggedInUserData?.user._id ,
                           item.userId
                         );
                       }
@@ -592,7 +592,7 @@ export default function UserProfile() {
                       setRefreshFollow((prev) => !prev);
                     }}
                   >
-                    {checkIsFollowing(currentLoggedInUserData.id, item.userId)
+                    {checkIsFollowing(currentLoggedInUserData?.user._id , item.userId)
                       ? "Unfollow"
                       : "Follow"}
                   </Button>

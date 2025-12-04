@@ -2,15 +2,14 @@ import type React from "react";
 
 //User registration and authentication types
 export interface User {
-  id: string;
-  username: string;
-  email: string;
-  password: string;
-  
+  accessToken:string
+  user:any
 }
 export interface UserContextInterface {
   currentLoggedInUserData: User|null;
   setCurrentLoggedInUserData: React.Dispatch<React.SetStateAction<User|null>>
+  loading:boolean,
+  setLoading:React.Dispatch<React.SetStateAction<boolean>>
   
 }
 export type PostPopupProps = {

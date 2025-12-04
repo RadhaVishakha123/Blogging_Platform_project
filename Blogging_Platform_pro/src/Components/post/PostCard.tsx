@@ -13,12 +13,12 @@ import type { UserPostLike } from "../../Helper/Type";
 
 export default function PostCard({ post, onCommentClick }: any) {
   const { currentLoggedInUserData } = useUser();
-  const loggedInUserId = currentLoggedInUserData?.id;
+  const loggedInUserId = currentLoggedInUserData?.user._id;
 
   const [userPostLikeData, setUserPostLikeData] = useState<UserPostLike[]>(() => {
     return JSON.parse(localStorage.getItem("userPostLikeData") ?? "[]") || [];
   });
-  console.log("postCard data:",post)
+
 
   useEffect(() => {
     localStorage.setItem("userPostLikeData", JSON.stringify(userPostLikeData));
@@ -36,10 +36,10 @@ export default function PostCard({ post, onCommentClick }: any) {
 
   if (!post) return null; // <- Safety guard
 const clickbtn = ()=>{
-  const updated_data = toggleLike(postId,currentLoggedInUserData?.id as string,userPostLikeData)
+  const updated_data = toggleLike(postId,currentLoggedInUserData?.user._id as string,userPostLikeData)
   setUserPostLikeData(updated_data)
 }
-console.log(userPostLikeData)
+
   return (
     <Card className="bg-[#111] border border-gray-800 text-white">
       {/* User Info */}

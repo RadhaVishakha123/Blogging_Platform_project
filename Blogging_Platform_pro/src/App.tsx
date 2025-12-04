@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router-dom";
 import LayoutProeject from "./LayoutProject";
 import Home from "./Components/home/Home";
 import UserProfile from "./Components/userProfile/UserProfile";
+import TokenRefresher from "./Components/token/TokenRefresher";
 function App() {
   const router = createBrowserRouter([
     { path: "/", element: <AuthLoginRegister /> },
@@ -19,6 +20,7 @@ function App() {
   return (
     <>
       <UserContextProvider>
+        <TokenRefresher/>
           <RouterProvider router={router}></RouterProvider>
       </UserContextProvider>   
 {/* <UserContextProvider><AuthLoginRegister/></UserContextProvider>

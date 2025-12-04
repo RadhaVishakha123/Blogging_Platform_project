@@ -1,41 +1,33 @@
-import { createContext } from "react";
-import { useState, useEffect } from "react";
-import type { User, UserContextInterface } from "../Helper/Type";
+import { createContext, useState, useEffect } from "react";
+import type { UserContextInterface } from "../Helper/Type";
+
 export const UserContext = createContext<UserContextInterface>({
   currentLoggedInUserData: null,
   setCurrentLoggedInUserData: () => {},
+  loading: false,
+  setLoading: () => {},
 });
+
 export default function UserContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  
-  const [currentLoggedInUserData, setCurrentLoggedInUserData] =
-    useState<User | null>(() => {
-      return (
-        JSON.parse(localStorage.getItem("currentLoggedInUserData") ?? "null") ||
-        null
-      );
-    });
-  
-  useEffect(() => {
-    localStorage.setItem(
-      "currentLoggedInUserData",
-      JSON.stringify(currentLoggedInUserData)
-    );
-  }, [currentLoggedInUserData]);
+  const [currentLoggedInUserData, setCurrentLoggedInUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(()=>{},[currentLoggedInUserData,loading])
 
   return (
-    <>
-      <UserContext.Provider
-        value={{
-          currentLoggedInUserData,
-          setCurrentLoggedInUserData,
-        }}
-      >
-        {children}
-      </UserContext.Provider>
-    </>
+    <UserContext.Provider
+      value={{
+        currentLoggedInUserData,
+        setCurrentLoggedInUserData,
+        loading,
+        setLoading,
+      }}
+    >
+      {children}
+    </UserContext.Provider>
   );
 }
